@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1006671743185",
+    "project_id": "nexuswellness-3590b",
+    "storage_bucket": "nexuswellness-3590b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006671743185:android:358f9c697778894d29ddf0",
+        "android_client_info": {
+          "package_name": "com.example.nexuswellness"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1006671743185-ba1eaeh9rht88mlqe25pe3mavc68rabo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nexuswellness",
+            "certificate_hash": "9148b7eaab15ec1f8fb7a6c99535ca7c692a292f"
+          }
+        },
+        {
+          "client_id": "1006671743185-h87pl2goq896n3bipfa88ldd1nnikddd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBChXVNdjOHQDG3t4Z1FjHMo2pPP6i_tnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1006671743185-h87pl2goq896n3bipfa88ldd1nnikddd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
