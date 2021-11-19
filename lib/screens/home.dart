@@ -6,6 +6,7 @@ import 'package:nexuswellness/assets/constants.dart';
 import 'package:nexuswellness/widgets/mainwidgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key? key}) : super(key: key);
 
@@ -35,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Center(
                 child: Text(
-                  "NEXUS Wellness Solutions provides Services in the areas of Health, Wellness, Education, Training, and Research Development.",
+                  "Nexus Wellness Solutions provide referrals for important services for communities, families, and individuals.",
                   style: TextStyle(fontSize: 13),
                   textAlign: TextAlign.justify,
                 ),
@@ -65,7 +66,17 @@ class _LoginScreenState extends State<LoginScreen> {
                               padding: EdgeInsets.all(30),
                               child: Column(children: <Widget>[
                                 Text(
-                                    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,"),
+                                    "Explore the app for more information on Housing Stability, Food Assistance, and information on qualified service providers for vaccinations and COVID-19 testing."),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Text(
+                                    "Premium plan for you Free- all levels of memberships get access to updated articles, event photos, and products. 0.99 members- get priority for wellness questions to be answered and life skills support class materials"),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Text(
+                                    "\$9.99 members-get priority for wellness questions to be answered, life skills support class materials, and discounts on event tickets and purple table talk events"),
                               ]),
                             ),
                           ),

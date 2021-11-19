@@ -1,5 +1,4 @@
-
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:nexuswellness/assets/apiUrls.dart';
@@ -9,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key? key}) : super(key: key);
@@ -21,17 +21,36 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController emailcontroller = new TextEditingController();
   TextEditingController passwordcontroller = new TextEditingController();
 
-   final _formKey = GlobalKey<FormState>();
-     bool loading = false;
+  Future<UserCredential> signInWithGoogle() async {
+    // Trigger the authentication flow
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
+
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+
+    // Once signed in, return the UserCredential
+    return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  final _formKey = GlobalKey<FormState>();
+  bool loading = false;
 
   loginUser() async {
-       final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       loading = true;
     });
     var url = login_url;
 
-  final response = await http.post(Uri.parse(url),
+    final response = await http.post(
+      Uri.parse(url),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -41,23 +60,20 @@ class _LoginPageState extends State<LoginPage> {
       }),
     );
     // print(response.body);
-    if(response.statusCode==401 ){
- 
+    if (response.statusCode == 401) {
       final snackBar = SnackBar(
-      content: Text('Please Check your credentials'),
-      duration: const Duration(milliseconds: 800),
-      backgroundColor: Colors.redAccent,
-  
-      action: SnackBarAction(
-        label: 'error',
-
-        textColor: Colors.white,
-        onPressed: () {
-          // Some code to undo the change.
-        },
-      ),
-    );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        content: Text('Please Check your credentials'),
+        duration: const Duration(milliseconds: 800),
+        backgroundColor: Colors.redAccent,
+        action: SnackBarAction(
+          label: 'error',
+          textColor: Colors.white,
+          onPressed: () {
+            // Some code to undo the change.
+          },
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
     if (response.statusCode == 200) {
       var res = json.decode(response.body);
@@ -65,16 +81,17 @@ class _LoginPageState extends State<LoginPage> {
       if (res.length > 0) {
         setState(() {
           // print("res1"+res['access_token'].toString());
-         
-           prefs.setString("token", res['access_token']);
-           Navigator.pushNamed(context, '/new/feeds'); 
+
+          prefs.setString("token", res['access_token']);
+          Navigator.pushNamed(context, '/new/feeds');
           loading = false;
         });
-      } else {         
+      } else {
         loading = false;
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,152 +111,160 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.only(left: 20),
               child: Text("Sign in To Continue..", style: ksubTitleGreenStyle),
             ),
-           
             Form(
-            key: _formKey,
-            child: Column(
-            children: [
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Container(
-                child: TextFormField(
-                  controller: emailcontroller,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter email address';
-                      }
-                      return null;
-                    },
-                  decoration: InputDecoration(
-                      border: UnderlineInputBorder(),
-                      labelText: 'Enter a Email Address'),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Container(
-                child: TextFormField
-                (
-                  controller: passwordcontroller,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter password';
-                      }
-                      return null;
-                    },
-                  obscureText: true,
-                  decoration: InputDecoration(
-                      border: UnderlineInputBorder(),
-                      labelText: 'Enter a Password'),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Container(
-                height: 50,
-                width: MediaQuery.of(context).size.width/1,
-                child: FlatButton(
-                  shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(5.0),
-                  ),
-                  onPressed: () {
-                       if (_formKey.currentState!.validate()) {
-                                    final snackBar = SnackBar(
-                                      content: Text('Please wait'),
-                                      backgroundColor: Colors.green,
-                                      duration: const Duration(milliseconds: 800),
-                                      action: SnackBarAction(
-                                        label: 'success',
-                                        textColor: Colors.white,
-                                        onPressed: () {
-                                          // Some code to undo the change.
-                                        },
-                                      ),
-                                    );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-         Center(
-            child: CircularProgressIndicator(
-            valueColor: new AlwaysStoppedAnimation<Color>(Color(kPrimaryColor)),
-          ));
-                                    loginUser();
-                                    // Navigator.pushNamed(context, '/plans');  
-                                  }
-                    
-                  },
-                  color: Color(kPrimaryColor),
-                  child: Text(
-                    "Login",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22.0,
+                key: _formKey,
+                child: Column(children: [
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Container(
+                      child: TextFormField(
+                        controller: emailcontroller,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter email address';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                            border: UnderlineInputBorder(),
+                            labelText: 'Enter a Email Address'),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
-            Divider(),
-            Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Container(
-                    color: Colors.transparent,
-                    width: MediaQuery.of(context).size.width / 1.1,
-                    height: 60,
-                    child: OutlineButton(
-                      highlightedBorderColor: Color(kPrimaryColor),
-                      borderSide:
-                          BorderSide(width: 2, color: Color(kPrimaryColor)),
-                      onPressed: () {
-                        
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Continue With",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Image.asset(
-                            "assets/images/gmail.png",
-                            height: 20,
-                            width: 20,
-                          ), // icon
-                          // text
-                        ],
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Container(
+                      child: TextFormField(
+                        controller: passwordcontroller,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter password';
+                          }
+                          return null;
+                        },
+                        obscureText: true,
+                        decoration: InputDecoration(
+                            border: UnderlineInputBorder(),
+                            labelText: 'Enter a Password'),
                       ),
-                    ))),
-            Divider(),
-             ])),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-                  child:  GestureDetector(
-                    child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Not a Member ",
-                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
-                                    ),
-                                    Text(
-                                      "SignUp",
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Container(
+                      height: 50,
+                      width: MediaQuery.of(context).size.width / 1,
+                      child: FlatButton(
+                        shape: new RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(5.0),
+                        ),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            final snackBar = SnackBar(
+                              content: Text('Please wait'),
+                              backgroundColor: Colors.green,
+                              duration: const Duration(milliseconds: 800),
+                              action: SnackBarAction(
+                                label: 'success',
+                                textColor: Colors.white,
+                                onPressed: () {
+                                  // Some code to undo the change.
+                                },
+                              ),
+                            );
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                            Center(
+                                child: CircularProgressIndicator(
+                              valueColor: new AlwaysStoppedAnimation<Color>(
+                                  Color(kPrimaryColor)),
+                            ));
+                            loginUser();
+                            // Navigator.pushNamed(context, '/plans');
+                          }
+                        },
+                        color: Color(kPrimaryColor),
+                        child: Text(
+                          "Login",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Divider(),
+                  Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Container(
+                          color: Colors.transparent,
+                          width: MediaQuery.of(context).size.width / 1.1,
+                          height: 60,
+                          child: OutlineButton(
+                            highlightedBorderColor: Color(kPrimaryColor),
+                            borderSide: BorderSide(
+                                width: 2, color: Color(kPrimaryColor)),
+                            onPressed: () {},
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      // Toggle light when tapped.
+                                      try {
+                                        signInWithGoogle();
+                                        print("hello");
+                                      } catch (e) {
+                                        print("hello");
+                                      }
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      "Continue With",
                                       style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(kgreenColor)),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
                                     ),
-                                  ],
+                                  ),
                                 ),
+                                Image.asset(
+                                  "assets/images/gmail.png",
+                                  height: 20,
+                                  width: 20,
+                                ), // icon
+                                // text
+                              ],
+                            ),
+                          ))),
+                  Divider(),
+                ])),
+            Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GestureDetector(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Not a Member ",
+                          style: TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.w800),
+                        ),
+                        Text(
+                          "SignUp",
+                          style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: Color(kgreenColor)),
+                        ),
+                      ],
+                    ),
                     onTap: () {
-                     Navigator.pushNamed(context, '/signup');
-                    }
-                  )
-         
-            ),
+                      Navigator.pushNamed(context, '/signup');
+                    })),
           ],
         ),
       ]),
